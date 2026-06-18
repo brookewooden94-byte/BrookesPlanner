@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Work & Internships</title>
+
+<style>
+body{
+    margin:0;
+    background:#fff4fa;
+    font-family:Arial,sans-serif;
+}
+
+header{
+    background:linear-gradient(135deg,#ff69b4,#ffb6d9);
+    color:white;
+    text-align:center;
+    padding:50px;
+}
+
+header h1{
+    font-size:60px;
+    margin:0;
+}
+
+.container{
+    display:flex;
+    gap:35px;
+    padding:35px;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+.sidebar{
+    width:420px;
+}
+
+.main{
+    width:650px;
+}
+
+.card{
+    background:#f4fff8;
+    border-radius:25px;
+    padding:28px;
+    margin-bottom:25px;
+    box-shadow:0 4px 12px rgba(255,105,180,.2);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.card h2{
+    color:#c04f82;
+    text-align:center;
+}
+
+input,
+select,
+button{
+    width:85%;
+    padding:12px;
+    margin:10px auto;
+    border-radius:12px;
+    border:2px solid #ffb6d9;
+}
+
+button{
+    background:#ff69b4;
+    color:white;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#d63384;
+}
+
+.work-item{
+    background:white;
+    border-left:8px solid #ff69b4;
+    border-radius:18px;
+    padding:18px;
+    margin:15px 0;
+    width:90%;
+    box-shadow:0 4px 10px rgba(255,105,180,.18);
+}
+
+.work-item h3{
+    color:#c04f82;
+    margin-top:0;
+}
+
+.home{
+    text-align:center;
+    padding:25px;
+}
+
+.home-btn{
+    display:inline-block;
+    background:#ff69b4;
+    color:white;
+    padding:12px 25px;
+    border-radius:20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.home-btn:hover{
+    background:#d63384;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>💼 Work & Internships</h1>
+    <p>Shifts • Tasks • Internships</p>
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<div class="card">
+<h2>Add Work Item</h2>
+
+<input type="text" id="itemName" placeholder="Shift, Task, or Internship Name">
+
+<select id="itemType">
+    <option>Shift</option>
+    <option>Task</option>
+    <option>Internship</option>
+</select>
+
+<input type="text" id="organization" placeholder="Workplace, Company, or Organization">
+
+<input type="date" id="dueDate">
+
+<select id="priority">
+    <option>High</option>
+    <option>Medium</option>
+    <option>Low</option>
+</select>
+
+<button onclick="addWorkItem()">Add Item</button>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="card">
+<h2>💼 Internships</h2>
+<div id="internshipList"></div>
+</div>
+
+<div class="card">
+<h2>📅 Shifts</h2>
+<div id="shiftList"></div>
+</div>
+
+<div class="card">
+<h2>✅ Tasks</h2>
+<div id="taskList"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="home">
+<a href="index.html" class="home-btn">🏠 Back Home</a>
+</div>
+
+<script>
+let workItems = JSON.parse(localStorage.getItem("workItems")) || [];
+
+function saveWorkItems(){
+    localStorage.setItem("workItems", JSON.stringify(workItems));
+}
+
+function addWorkItem(){
+    let itemName = document.getElementById("itemName").value;
+    let itemType = document.getElementById("itemType").value;
+    let organization = document.getElementById("organization").value;
+    let dueDate = document.getElementById("dueDate").value;
+    let priority = document.getElementById("priority").value;
+
+    if(itemName === "" || organization === "" || dueDate === ""){
+        alert("Please enter a name, organization, and date.");
+        return;
+    }
+
+    workItems.push({
+        itemName:itemName,
+        itemType:itemType,
+        organization:organization,
+        dueDate:dueDate,
+        priority:priority
+    });
+
+    saveWorkItems();
+    displayWorkItems();
+
+    document.getElementById("itemName").value = "";
+    document.getElementById("organization").value = "";
+    document.getElementById("dueDate").value = "";
+}
+
+function deleteWorkItem(index){
+    workItems.splice(index,1);
+    saveWorkItems();
+    displayWorkItems();
+}
+
+function createWorkCard(item,index){
+    return `
+        <div class="work-item">
+            <h3>${item.itemName}</h3>
+            <p><strong>Type:</strong> ${item.itemType}</p>
+            <p><strong>Place:</strong> ${item.organization}</p>
+            <p><strong>Date:</strong> ${item.dueDate}</p>
+            <p><strong>Priority:</strong> ${item.priority}</p>
+            <button onclick="deleteWorkItem(${index})">Complete</button>
+        </div>
+    `;
+}
+
+function displayWorkItems(){
+    let internshipList = document.getElementById("internshipList");
+    let shiftList = document.getElementById("shiftList");
+    let taskList = document.getElementById("taskList");
+
+    internshipList.innerHTML = "";
+    shiftList.innerHTML = "";
+    taskList.innerHTML = "";
+
+    workItems.sort(function(a,b){
+        return new Date(a.dueDate) - new Date(b.dueDate);
+    });
+
+    for(let i = 0; i < workItems.length; i++){
+        let item = workItems[i];
+
+        if(item.itemType === "Internship"){
+            internshipList.innerHTML += createWorkCard(item,i);
+        }
+        else if(item.itemType === "Shift"){
+            shiftList.innerHTML += createWorkCard(item,i);
+        }
+        else{
+            taskList.innerHTML += createWorkCard(item,i);
+        }
+    }
+}
+
+displayWorkItems();
+</script>
+
+</body>
+</html>
