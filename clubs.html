@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Clubs Planner</title>
+
+<style>
+body{
+    margin:0;
+    background:#fff4fa;
+    font-family:Arial,sans-serif;
+}
+
+header{
+    background:linear-gradient(135deg,#ff69b4,#ffb6d9);
+    color:white;
+    text-align:center;
+    padding:50px;
+}
+
+header h1{
+    font-size:60px;
+    margin:0;
+}
+
+.container{
+    display:flex;
+    gap:35px;
+    padding:35px;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+.sidebar{
+    width:420px;
+}
+
+.main{
+    width:650px;
+}
+
+.card{
+    background:#f4fff8;
+    border-radius:25px;
+    padding:28px;
+    margin-bottom:25px;
+    box-shadow:0 4px 12px rgba(255,105,180,.2);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.card h2{
+    color:#c04f82;
+    text-align:center;
+}
+
+input,
+select,
+button{
+    width:85%;
+    padding:12px;
+    margin:10px auto;
+    border-radius:12px;
+    border:2px solid #ffb6d9;
+}
+
+button{
+    background:#ff69b4;
+    color:white;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#d63384;
+}
+
+.club-item{
+    color:white;
+    border-radius:20px;
+    padding:18px;
+    margin:15px 0;
+    width:90%;
+    box-shadow:0 4px 10px rgba(0,0,0,.12);
+}
+
+.club-item h3{
+    margin-top:0;
+}
+
+.modelun{
+    background:#6ec6ff;
+}
+
+.bhw{
+    background:#ff8ec7;
+}
+
+.h4h{
+    background:#b388ff;
+}
+
+.relay{
+    background:#ffd54f;
+    color:#4b3b00;
+}
+
+.rhokappa{
+    background:#81c784;
+}
+
+.home{
+    text-align:center;
+    padding:25px;
+}
+
+.home-btn{
+    display:inline-block;
+    background:#ff69b4;
+    color:white;
+    padding:12px 25px;
+    border-radius:20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.home-btn:hover{
+    background:#d63384;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>👥 Clubs Planner</h1>
+    <p>Model UN • Building Her Wings • H4H • Relay for Life • Rho Kappa</p>
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<div class="card">
+<h2>Add Club Item</h2>
+
+<input type="text" id="taskName" placeholder="Task, Event, or Meeting Name">
+
+<select id="club">
+    <option>Model UN</option>
+    <option>Building Her Wings</option>
+    <option>Hearts for Humanity</option>
+    <option>Relay for Life</option>
+    <option>Rho Kappa</option>
+</select>
+
+<input type="date" id="date">
+
+<select id="priority">
+    <option>High</option>
+    <option>Medium</option>
+    <option>Low</option>
+</select>
+
+<button onclick="addClubItem()">Add Item</button>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="card">
+<h2>💙 Model UN</h2>
+<div id="modelunList"></div>
+</div>
+
+<div class="card">
+<h2>💗 Building Her Wings</h2>
+<div id="bhwList"></div>
+</div>
+
+<div class="card">
+<h2>💜 Hearts for Humanity</h2>
+<div id="h4hList"></div>
+</div>
+
+<div class="card">
+<h2>💛 Relay for Life</h2>
+<div id="relayList"></div>
+</div>
+
+<div class="card">
+<h2>💚 Rho Kappa</h2>
+<div id="rhokappaList"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="home">
+<a href="index.html" class="home-btn">🏠 Back Home</a>
+</div>
+
+<script>
+let clubItems = JSON.parse(localStorage.getItem("clubItems")) || [];
+
+function saveClubItems(){
+    localStorage.setItem("clubItems", JSON.stringify(clubItems));
+}
+
+function addClubItem(){
+    let taskName = document.getElementById("taskName").value;
+    let club = document.getElementById("club").value;
+    let date = document.getElementById("date").value;
+    let priority = document.getElementById("priority").value;
+
+    if(taskName === "" || date === ""){
+        alert("Please enter a task/event name and date.");
+        return;
+    }
+
+    clubItems.push({
+        taskName:taskName,
+        club:club,
+        date:date,
+        priority:priority
+    });
+
+    saveClubItems();
+    displayClubItems();
+
+    document.getElementById("taskName").value = "";
+    document.getElementById("date").value = "";
+}
+
+function deleteClubItem(index){
+    clubItems.splice(index,1);
+    saveClubItems();
+    displayClubItems();
+}
+
+function getClubClass(club){
+    if(club === "Model UN"){
+        return "modelun";
+    }
+    if(club === "Building Her Wings"){
+        return "bhw";
+    }
+    if(club === "Hearts for Humanity"){
+        return "h4h";
+    }
+    if(club === "Relay for Life"){
+        return "relay";
+    }
+    if(club === "Rho Kappa"){
+        return "rhokappa";
+    }
+}
+
+function createClubCard(item,index){
+    return `
+        <div class="club-item ${getClubClass(item.club)}">
+            <h3>${item.taskName}</h3>
+            <p><strong>Date:</strong> ${item.date}</p>
+            <p><strong>Priority:</strong> ${item.priority}</p>
+            <button onclick="deleteClubItem(${index})">Complete</button>
+        </div>
+    `;
+}
+
+function displayClubItems(){
+    let modelunList = document.getElementById("modelunList");
+    let bhwList = document.getElementById("bhwList");
+    let h4hList = document.getElementById("h4hList");
+    let relayList = document.getElementById("relayList");
+    let rhokappaList = document.getElementById("rhokappaList");
+
+    modelunList.innerHTML = "";
+    bhwList.innerHTML = "";
+    h4hList.innerHTML = "";
+    relayList.innerHTML = "";
+    rhokappaList.innerHTML = "";
+
+    clubItems.sort(function(a,b){
+        return new Date(a.date) - new Date(b.date);
+    });
+
+    for(let i = 0; i < clubItems.length; i++){
+        let item = clubItems[i];
+
+        if(item.club === "Model UN"){
+            modelunList.innerHTML += createClubCard(item,i);
+        }
+        else if(item.club === "Building Her Wings"){
+            bhwList.innerHTML += createClubCard(item,i);
+        }
+        else if(item.club === "Hearts for Humanity"){
+            h4hList.innerHTML += createClubCard(item,i);
+        }
+        else if(item.club === "Relay for Life"){
+            relayList.innerHTML += createClubCard(item,i);
+        }
+        else if(item.club === "Rho Kappa"){
+            rhokappaList.innerHTML += createClubCard(item,i);
+        }
+    }
+}
+
+displayClubItems();
+</script>
+
+</body>
+</html>

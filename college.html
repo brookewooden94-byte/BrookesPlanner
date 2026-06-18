@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>College Tracker</title>
+
+<style>
+body{
+    margin:0;
+    background:#fff4fa;
+    font-family:Arial,sans-serif;
+}
+
+header{
+    background:linear-gradient(135deg,#ff69b4,#ffb6d9);
+    color:white;
+    text-align:center;
+    padding:50px;
+}
+
+header h1{
+    font-size:60px;
+    margin:0;
+}
+
+.container{
+    display:flex;
+    gap:35px;
+    padding:35px;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+.sidebar{
+    width:420px;
+}
+
+.main{
+    width:650px;
+}
+
+.card{
+    background:#f4fff8;
+    border-radius:25px;
+    padding:28px;
+    margin-bottom:25px;
+    box-shadow:0 4px 12px rgba(255,105,180,.2);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.card h2{
+    color:#c04f82;
+    text-align:center;
+}
+
+input,
+select,
+button{
+    width:85%;
+    padding:12px;
+    margin:10px auto;
+    border-radius:12px;
+    border:2px solid #ffb6d9;
+}
+
+button{
+    background:#ff69b4;
+    color:white;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#d63384;
+}
+
+.college-item{
+    background:white;
+    border-left:8px solid #ff69b4;
+    border-radius:18px;
+    padding:18px;
+    margin:15px 0;
+    width:90%;
+    box-shadow:0 4px 10px rgba(255,105,180,.18);
+}
+
+.college-item h3{
+    color:#c04f82;
+    margin-top:0;
+}
+
+.home{
+    text-align:center;
+    padding:25px;
+}
+
+.home-btn{
+    display:inline-block;
+    background:#ff69b4;
+    color:white;
+    padding:12px 25px;
+    border-radius:20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.home-btn:hover{
+    background:#d63384;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🎓 College Tracker</h1>
+    <p>Applications • Essays • Scholarships</p>
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<div class="card">
+<h2>Add College Item</h2>
+
+<input type="text" id="itemName" placeholder="School, Essay, or Scholarship Name">
+
+<select id="itemType">
+    <option>Application</option>
+    <option>Essay</option>
+    <option>Scholarship</option>
+</select>
+
+<input type="text" id="schoolName" placeholder="College or Organization">
+
+<input type="date" id="dueDate">
+
+<select id="status">
+    <option>Not Started</option>
+    <option>In Progress</option>
+    <option>Submitted</option>
+</select>
+
+<button onclick="addCollegeItem()">Add Item</button>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="card">
+<h2>🏫 Applications</h2>
+<div id="applicationList"></div>
+</div>
+
+<div class="card">
+<h2>📝 Essays</h2>
+<div id="essayList"></div>
+</div>
+
+<div class="card">
+<h2>💰 Scholarships</h2>
+<div id="scholarshipList"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="home">
+<a href="index.html" class="home-btn">🏠 Back Home</a>
+</div>
+
+<script>
+let collegeItems = JSON.parse(localStorage.getItem("collegeItems")) || [];
+
+function saveCollegeItems(){
+    localStorage.setItem("collegeItems", JSON.stringify(collegeItems));
+}
+
+function addCollegeItem(){
+    let itemName = document.getElementById("itemName").value;
+    let itemType = document.getElementById("itemType").value;
+    let schoolName = document.getElementById("schoolName").value;
+    let dueDate = document.getElementById("dueDate").value;
+    let status = document.getElementById("status").value;
+
+    if(itemName === "" || schoolName === "" || dueDate === ""){
+        alert("Please enter a name, school/organization, and date.");
+        return;
+    }
+
+    collegeItems.push({
+        itemName:itemName,
+        itemType:itemType,
+        schoolName:schoolName,
+        dueDate:dueDate,
+        status:status
+    });
+
+    saveCollegeItems();
+    displayCollegeItems();
+
+    document.getElementById("itemName").value = "";
+    document.getElementById("schoolName").value = "";
+    document.getElementById("dueDate").value = "";
+}
+
+function deleteCollegeItem(index){
+    collegeItems.splice(index,1);
+    saveCollegeItems();
+    displayCollegeItems();
+}
+
+function createCollegeCard(item,index){
+    return `
+        <div class="college-item">
+            <h3>${item.itemName}</h3>
+            <p><strong>Type:</strong> ${item.itemType}</p>
+            <p><strong>School/Org:</strong> ${item.schoolName}</p>
+            <p><strong>Deadline:</strong> ${item.dueDate}</p>
+            <p><strong>Status:</strong> ${item.status}</p>
+            <button onclick="deleteCollegeItem(${index})">Delete</button>
+        </div>
+    `;
+}
+
+function displayCollegeItems(){
+    let applicationList = document.getElementById("applicationList");
+    let essayList = document.getElementById("essayList");
+    let scholarshipList = document.getElementById("scholarshipList");
+
+    applicationList.innerHTML = "";
+    essayList.innerHTML = "";
+    scholarshipList.innerHTML = "";
+
+    collegeItems.sort(function(a,b){
+        return new Date(a.dueDate) - new Date(b.dueDate);
+    });
+
+    for(let i = 0; i < collegeItems.length; i++){
+        let item = collegeItems[i];
+
+        if(item.itemType === "Application"){
+            applicationList.innerHTML += createCollegeCard(item,i);
+        }
+        else if(item.itemType === "Essay"){
+            essayList.innerHTML += createCollegeCard(item,i);
+        }
+        else{
+            scholarshipList.innerHTML += createCollegeCard(item,i);
+        }
+    }
+}
+
+displayCollegeItems();
+</script>
+
+</body>
+</html>

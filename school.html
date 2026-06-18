@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>School Dashboard</title>
+
+<style>
+body{
+    margin:0;
+    background:#fff4fa;
+    font-family:Arial,sans-serif;
+}
+
+header{
+    background:linear-gradient(135deg,#ff69b4,#ffb6d9);
+    color:white;
+    text-align:center;
+    padding:50px;
+}
+
+header h1{
+    font-size:60px;
+    margin:0;
+}
+
+.container{
+    display:flex;
+    gap:35px;
+    padding:35px;
+    justify-content:center;
+    align-items:flex-start;
+}
+
+.sidebar{
+    width:420px;
+}
+
+.main{
+    width:650px;
+}
+
+.card{
+    background:#f4fff8;
+    border-radius:25px;
+    padding:28px;
+    margin-bottom:25px;
+    box-shadow:0 4px 12px rgba(255,105,180,.2);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.card h2{
+    color:#c04f82;
+    text-align:center;
+}
+
+input,
+select,
+button{
+    width:85%;
+    padding:12px;
+    margin:10px auto;
+    border-radius:12px;
+    border:2px solid #ffb6d9;
+}
+
+button{
+    background:#ff69b4;
+    color:white;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#d63384;
+}
+
+.school-item{
+    background:white;
+    border-left:8px solid #ff69b4;
+    border-radius:18px;
+    padding:18px;
+    margin:15px 0;
+    width:90%;
+    box-shadow:0 4px 10px rgba(255,105,180,.18);
+}
+
+.school-item h3{
+    color:#c04f82;
+    margin-top:0;
+}
+
+.home{
+    text-align:center;
+    padding:25px;
+}
+
+.home-btn{
+    display:inline-block;
+    background:#ff69b4;
+    color:white;
+    padding:12px 25px;
+    border-radius:20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.home-btn:hover{
+    background:#d63384;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>📚 School Dashboard</h1>
+    <p>Assignments • Tests • Quizzes • Dual Enrollment</p>
+</header>
+
+<div class="container">
+
+<div class="sidebar">
+
+<div class="card">
+<h2>Add School Item</h2>
+
+<input type="text" id="itemName" placeholder="Assignment, Test, or Quiz Name">
+
+<select id="itemType">
+    <option>Assignment</option>
+    <option>Test</option>
+    <option>Quiz</option>
+    <option>Project</option>
+    <option>Discussion Post</option>
+</select>
+
+<select id="className">
+    <option>AP Government</option>
+    <option>AP Psychology</option>
+    <option>AICE Literature</option>
+    <option>Physics</option>
+    <option>Calculus</option>
+    <option>Dual Enrollment</option>
+</select>
+
+<input type="date" id="dueDate">
+
+<select id="priority">
+    <option>High</option>
+    <option>Medium</option>
+    <option>Low</option>
+</select>
+
+<button onclick="addSchoolItem()">Add Item</button>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="card">
+<h2>📖 Upcoming Tests & Quizzes</h2>
+<div id="testList"></div>
+</div>
+
+<div class="card">
+<h2>📝 Upcoming Assignments</h2>
+<div id="assignmentList"></div>
+</div>
+
+<div class="card">
+<h2>🎓 Dual Enrollment</h2>
+<div id="dualList"></div>
+</div>
+
+</div>
+
+</div>
+
+<div class="home">
+<a href="index.html" class="home-btn">🏠 Back Home</a>
+</div>
+
+<script>
+let schoolItems = JSON.parse(localStorage.getItem("schoolItems")) || [];
+
+function saveSchoolItems(){
+    localStorage.setItem("schoolItems", JSON.stringify(schoolItems));
+}
+
+function addSchoolItem(){
+    let itemName = document.getElementById("itemName").value;
+    let itemType = document.getElementById("itemType").value;
+    let className = document.getElementById("className").value;
+    let dueDate = document.getElementById("dueDate").value;
+    let priority = document.getElementById("priority").value;
+
+    if(itemName === "" || dueDate === ""){
+        alert("Please enter a name and date.");
+        return;
+    }
+
+    schoolItems.push({
+        itemName:itemName,
+        itemType:itemType,
+        className:className,
+        dueDate:dueDate,
+        priority:priority
+    });
+
+    saveSchoolItems();
+    displaySchoolItems();
+
+    document.getElementById("itemName").value = "";
+    document.getElementById("dueDate").value = "";
+}
+
+function deleteSchoolItem(index){
+    schoolItems.splice(index,1);
+    saveSchoolItems();
+    displaySchoolItems();
+}
+
+function createItemCard(item,index){
+    return `
+        <div class="school-item">
+            <h3>${item.itemName}</h3>
+            <p><strong>Type:</strong> ${item.itemType}</p>
+            <p><strong>Class:</strong> ${item.className}</p>
+            <p><strong>Due:</strong> ${item.dueDate}</p>
+            <p><strong>Priority:</strong> ${item.priority}</p>
+            <button onclick="deleteSchoolItem(${index})">Complete</button>
+        </div>
+    `;
+}
+
+function displaySchoolItems(){
+    let testList = document.getElementById("testList");
+    let assignmentList = document.getElementById("assignmentList");
+    let dualList = document.getElementById("dualList");
+
+    testList.innerHTML = "";
+    assignmentList.innerHTML = "";
+    dualList.innerHTML = "";
+
+    schoolItems.sort(function(a,b){
+        return new Date(a.dueDate) - new Date(b.dueDate);
+    });
+
+    for(let i = 0; i < schoolItems.length; i++){
+        let item = schoolItems[i];
+
+        if(item.className === "Dual Enrollment"){
+            dualList.innerHTML += createItemCard(item,i);
+        }
+        else if(item.itemType === "Test" || item.itemType === "Quiz"){
+            testList.innerHTML += createItemCard(item,i);
+        }
+        else{
+            assignmentList.innerHTML += createItemCard(item,i);
+        }
+    }
+}
+
+displaySchoolItems();
+</script>
+
+</body>
+</html>
+
